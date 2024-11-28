@@ -1,0 +1,381 @@
+Page Ranking for a Web Search Engine.
+
+When a search is made on the Internet using a search engine, there is first a traditional text processing part, where the aim is to find all the Web pages containing the words of the query. 
+
+Due to the massive size of the Web, the number of hits is likely to be much too large to be of use. 
+
+Therefore, some measure of quality is needed to filter out pages that are assumed to be less interesting.
+
+When one uses a Web search engine it is typical that the search phrase is underspecified.
+
+A Google search conducted on September 29, 2005, using the search phrase university, gave as a result links to the following well-known universities: Harvard, Stanford, Cambridge, Yale, Cornell, Oxford. 
+
+The total number of Web pages relevant to the search phrase was more than 2 billion.
+
+Clearly Google used an algorithm for ranking all the Web pages that agrees rather well with a common-sense quality measure. 
+
+The ranking procedure was based not on human judgment but on the link structure of the Web. Loosely speaking, Google assigned a high rank to a Web page if it had inlinks from other pages that have a high rank. 
+
+We will see that this self-referencing statement can be formulated mathematically as an eigenvalue equation for a certain matrix.
+
+A Google search with the same search phrase made on February 6, 2019, gave the top result University - Wikipedia, which is a good answer for the highly underspecified search phrase. 
+
+Then came Linköping University, which shows that the search engine can see where the search is made from, and adapts the answer to this information. 
+
+The following six results were universities in Great Britain.
+
+It is clear that the ranking of search result is not entirely based on an impartial quality measure, and the ranking is sometimes also a matter of controversy. 
+
+The algorithm that was used in 2005, and is probably used to some extent also in 2019, was based on pagerank. 
+
+The ideas behind this concept have wider applicability than search engines, see e.g. [70]. 
+
+A few such examples are given at the end of this chapter.
+
+It is of course impossible to define a generally valid measure of relevance that would be acceptable for all users of a search engine. 
+
+The founders of Google invented the concept of pagerank as a quality measure of Web pages. 
+
+It is based on the assumption that the number of links to and from a page give information about the importance of a page. 
+
+We will give a description of pagerank based primarily on [84] and [41]. 
+
+Concerning Google, see [21].
+
+Assume that a search engines exists that indexes all Web pages. 
+
+Let the pages be ordered from 1 to n, and let i be a particular Web page. 
+
+Then Oi will denote the set of pages that i is linked to, the outlinks. 
+
+The number of outlinks is denoted Ni = |Oi|. 
+
+The set of inlinks, denoted Ii, are the pages that have an outlink to i.
+
+In general, a page i can be considered as more important the more inlinks it has. 
+
+However, a ranking system based only on the number of inlinks is easy to manipulate:30 whenyoudesignaWebpageithat (e.g.,forcommercialreasons) you would like to be seen by as many users as possible, you could simply create a large number of (informationless and unimportant) pages that have outlinks to i. 
+
+To discourage this, one defines the rank of i so that if a highly ranked page j has an outlink to i, this adds to the importance of i in the following way: the rank of page i is a weighted sum of the ranks of the pages that have outlinks to i. 
+
+The weighting is such that the rank of a page j is divided evenly among its outlinks. 
+
+Translating this into mathematics, we get.
+
+This preliminary definition is recursive, so pageranks cannot be computed directly. 
+
+Instead a fixed-point iteration might be used. 
+
+Guess an initial ranking vector r0. 
+
+Then iterate.
+
+There are a few problems with such an iteration: if a page has no outlinks, then in the iteration process it accumulates rank only via its inlinks, but this rank is never distributed further. 
+
+Therefore it is not clear if the iteration converges. 
+
+We will come back to this problem later.
+
+More insight is gained if we reformulate (13.1) as an eigenvalue problem for a matrix representing the graph of the Internet. 
+
+Let Q be a square matrix of dimension n. 
+
+Define if there is a link from to, otherwise.
+
+This means that row i has nonzero elements in the positions that correspond to inlinks of i. 
+
+Similarly, column j has nonzero elements equal to 1/Nj in the positions that correspond to the outlinks of j, and, provided that the page has outlinks, the sum of all the elements in column j is equal to one. 
+
+In the following symbolic picture of the matrix Q, nonzero elements are denoted:
+
+The following link graph illustrates a set of Web pages with outlinks and inlinks:
+
+The corresponding matrix becomes
+Since page 4 has no outlinks, the corresponding column is equal to zero.
+
+Obviously, the definition (13.1) is equivalent to the scalar product of row i and the vector r, which holds the ranks of all pages. We can write the equation in matrix form,
+λr = Qr, λ = 1, (13.3) i.e., r is an eigenvector of Q with eigenvalue λ = 1. 
+
+It is now easily seen that the iteration (13.2) is equivalent to, which is the power method for computing the eigenvector. 
+
+However, at this point it is not clear that pagerank is well defined, as we do not know if there exists an eigenvalue equal to 1. 
+
+It turns out that the theory of Markov chains is useful in the analysis.
+
+Random Walk and Markov Chains
+
+There is a random walk interpretation of the pagerank concept. 
+
+Assume that a surfer visiting a Web page chooses the next page among the outlinks with equal probability. 
+
+Then the random walk induces a Markov chain (see, e.g., [80]). 
+
+A Markov chain is a random process in which the next state is determined completely from the present state; the process has no memory. 
+
+The transition matrix of the Markov chain is. 
+
+Note that we use a slightly different notation than is common in the theory of stochastic processes.
+
+The random surfer should never get stuck. 
+
+In other words, our random walk model should have no pages without outlinks. 
+
+Such a page corresponds to a zero column in.
+
+Therefore the model is modified so that zero columns are replaced with a constant value in all positions. 
+
+This means that there is equal probability to go to any other Internet page.
+
+Define the vectors. 
+
+The modified matrix is defined
+
+With this modification the matrix P is a proper column-stochastic matrix: It has nonnegative elements, and the elements of each column sum up to 1. 
+
+The preceding statement can be reformulated as follows.
+
+A column-stochastic matrix P satisfies where is defined by.
+
+The matrix in the previous example is modified to
+
+In analogy to (13.3), we would like to define the pagerank vector as a unique eigenvector of P with eigenvalue 1.
+
+The eigenvector of the transition matrix corresponds to a stationary probability distribution for the Markov chain. 
+
+The element in position i, is the probability that after a large number of steps, the random walker is at Web page i. 
+
+However, the existence of a unique eigenvalue with eigenvalue 1 is still not guaranteed. 
+
+To ensure uniqueness, the matrix must be irreducible.
+
+A square matrix is called reducible if there is a permutation matrix P such that where X and Z are both square. 
+
+Otherwise the matrix is called irreducible. 
+
+To illustrate the concept of reducibility, we give an example of a link graph that corresponds to a reducible matrix. 
+
+A random walker who has entered the left part of the link graph will never get out of it, and similarly will get stuck in the right part. 
+
+The corresponding matrix is which is of the form (13.7). 
+
+Actually, this matrix has two eigenvalues equal to 1 and one equal to −1. 
+
+The directed graph corresponding to an irreducible matrix is strongly connected: given any two vertices (Ni,Nj), in the graph, there exists a path leading from Ni to Nj.
+
+The uniqueness of the largest eigenvalue of an irreducible, positive matrix is guaranteed by the Perron-Frobenius theorem; we state it for the special case treated here. 
+
+The inequality is understood as all the elements of A being strictly positive. 
+
+By dominant eigenvalue we mean the largest eigenvalue in magnitude, which we denote.
+
+Let A be an irreducible column-stochastic matrix. 
+
+The dominant eigenvalue is equal to 1. 
+
+There is a unique corresponding eigenvector satisfying, and, this is the only eigenvector that is nonnegative. 
+
+Because A is column stochastic, we have, which means that 1 is an eigenvalue of A. 
+
+The rest of the statement can be proved using the Perron-Frobenius theory.
+
+Given the size of the Internet, we can be sure that the link matrix P is reducible, which means that the pagerank eigenvector of P is not well defined. 
+
+To ensure irreducibility, i.e., to make it impossible for the random walker to get trapped in a subgraph, one adds, artificially, a link from every Web page to all the others. 
+
+In matrix terms, this can be made by taking a convex combination of and a rank-1 matrix,
+for some satisfying. 
+
+It is easy to see that the matrix A is column-stochastic:
+
+The random walk interpretation of the additional rank-1 term is that in each time step the surfer visiting a page will jump to a random page with probability (sometimes referred to as teleportation).
+
+We now see that the pagerank vector for the matrix is well defined.
+
+The column-stochastic matrix defined in is irreducible (since A > 0) and has the dominant eigenvalue. The corresponding eigenvector satisfies.
+
+For the convergence of the numerical eigenvalue algorithm, it is essential to know how the eigenvalues of are changed by the rank-1 modification.
+
+Assume that the eigenvalues of the column-stochastic matrix are. 
+
+Then the eigenvalues of are.
+
+Define to be normalized to Euclidean length 1, and let be such that is orthogonal. 
+
+Since we have made a similarity transformation, the matrix has the eigenvalues.
+
+The statement now follows immediately.
+
+Theorem 13.10 implies that even if has a multiple eigenvalue equal to 1, which is actually the case for the Google matrix, the second largest eigenvalue in magnitude of is always equal to.
+
+We compute the eigenvalues and eigenvectors of the matrix with from and.
+
+The MATLAB code gives the following result:
+
+It is seen that the first eigenvector (which corresponds to the eigenvalue 1), is the only nonnegative one, as stated in Theorem 13.8.
+
+Instead of the modification (13.9) we can define, where v is a nonnegative vector with  that can be chosen to make the search biased toward certain kinds of Web pages. 
+
+Therefore, it is sometimes referred to as a personalization vector. 
+
+The vector can also be used for avoiding manipulation by so-called link farms [69, 70].
+
+The Power Method for Pagerank Computation
+
+We want to solve the eigenvalue problem where r is normalized. 
+
+In this section we denote the sought eigenvector by t1. 
+
+Dealing with stochastic matrices and vectors that are probability distributions, it is natural to use the 1-norm for vectors. 
+
+Due to the sparsity and the dimension of A (of the order billions), it is out of the question to compute the eigenvector using any of the standard methods described in Chapter 17 for dense matrices, as those methods are based on applying orthogonal transformations to the matrix. 
+
+The only viable method so far is the power method.
+
+Assume that an initial approximation r(0) is given. 
+
+The power method is given in the following algorithm.
+
+The purpose of normalizing the vector (making it have 1-norm equal to 1) is to avoid having the vector become either very large or very small and thus unrepresentable in the floating point system. 
+
+We will see later that normalization is not necessary in the pagerank computation. 
+
+In this context there is no need to compute an eigenvalue approximation, as the sought eigenvalue is known to be equal to one.
+   
+The convergence of the power method depends on the distribution of eigenvalues. 
+
+To make the presentation simpler, we assume that A is diagonalizable, i.e., there exists a nonsingular matrix T of eigenvectors. 
+
+The eigenvalues λi are ordered. 
+
+Expand the initial approximation r(0) in terms of the eigenvectors, where is assumed and is the sought eigenvector. 
+
+Obviously, since for we have, the second term tends to zero and the power method converges to the eigenvector. 
+
+The rate of convergence is determined by. If this is close to 1, then the iteration is very slow. 
+
+Fortunately this is not the case for the Google matrix; see Theorem 13.10 and below.
+
+A stopping criterion for the power iteration can be formulated in terms of the residual vector for the eigenvalue problem. 
+
+Let be the computed approximation of the eigenvalue and the corresponding approximate eigenvector. 
+
+Then it can be shown that the optimal error matrix E, for which exactly, satisfies where. 
+
+This means that if the residual is small, then the computed approximate eigenvector is the exact eigenvector of a matrix A + E that is close to A. 
+
+Since in the pagerank computations we are dealing with a positive matrix, whose columns all add up to one, it is natural to use the 1-norm instead [65].
+
+As the 1-norm and the Euclidean norm are equivalent, this does not make much difference.
+
+In the usual formulation of the power method the vector is normalized to avoid underflow or overflow. 
+
+We now show that this is not necessary when the matrix is column stochastic.
+
+Assume that the vector z satisfies and that the matrix A is column stochastic. 
+
+Put y = Az. Then since A is column stochastic 
+
+This assumption can be expected to be satisfied in floating point arithmetic, if not at the first iteration, then after the second, due to round-off.
+
+In view of the huge dimensions of the Google matrix, it is nontrivial to compute the matrix-vector product where. 
+
+Recall that P was constructed from the actual link matrix Q as P = Q + n1 edT,
+where the row vector d has an element 1 in all those positions that correspond to Web pages with no outlinks. 
+
+This means that to form P, we insert a large number of full vectors into Q, each of the same dimension as the total number of Web pages. 
+
+Consequently, we cannot afford to store P explicitly. 
+
+Let us look at the multiplication y = Az in more detail:
+
+We do not need to compute β from this equation. 
+
+Instead we can use (13.11) in combination with:
+
+Thus, we have. 
+
+An extra bonus is that we do not use the vector d at all, i.e., we need not know which pages lack outlinks.
+
+The following MATLAB code implements the matrix vector multiplication:
+
+Here, or a personalized teleportation vector;
+
+To save memory, we should even avoid using the extra vector yhat and replace it with y. 
+
+From Theorem 13.10 we know that the second eigenvalue of the Google matrix satisfies 
+
+A typical value of α is 0.85. 
+
+Approximately k = 57 iterations are needed to make the factor 0.85k equal to 10−4. 
+
+This is reported to be close to the number of iterations used by Google.
+
+As an example we used the matrix P obtained from the domain stanford.edu.
+
+The number of pages is 281903, and the total number of links is 2312497. 
+
+Part of the matrix is displayed in Figure 13.1. 
+
+We computed the pagerank vector using the power method with α = 0.85 and iterated 63 times until the 1-norm of the residual was smaller than 10−6. 
+
+The residual and the final pagerank vector are illustrated in Figure 13.2.
+
+A 20000 × 20000 submatrix of the stanford.edu matrix.
+
+Because one pagerank calculation can take several days, several enhancements of the iteration procedure have been proposed. 
+
+In [63] an adaptive method is described that checks the convergence of the components of the pagerank vector and avoids performing the power iteration for those components. 
+
+Up to 30% speed-up has been reported. 
+
+The block structure of the Web is used in [64], and speed-ups of a factor of 2 have been reported. 
+
+An acceleration method based on Aitken extrapolation is described in [65]. 
+
+Aggregation methods are discussed in several papers by Langville and Meyer and in [61].
+
+When computing the pagerank for a subset of the Internet, say, one particular domain, the matrix P may be of a dimension for which one can use methods other than the power method, e.g., the Arnoldi method; see [49] and Section 17.8.3. 
+
+It may even be suficient to use the MATLAB function eigs, which computes a small number of eigenvalues and the corresponding eigenvectors of a sparse matrix using an Arnoldi method with restarts.
+
+A variant of pagerank is proposed in [53]. 
+
+Further properties of the pagerank matrix are given in [60].
+
+Another method based on the link structure of the Web was introduced at the same time as pagerank [67]. 
+
+The residual in the power iterations (top) and the pagerank vector (bottom) for the stanford.edu matrix.
+
+It is called HITS (Hypertext Induced Topic Search) and is based on the concepts of authorities and hubs. 
+
+An authority is a Web page with many inlinks, and a hub has many outlinks. 
+
+The basic idea is that good hubs point to good authorities and good authorities are pointed to by good hubs. 
+
+Each Web page is assigned both a hub score y and an authority score x.
+
+Let L be the adjacency matrix of the directed Web graph. 
+
+Then two equations are given that mathematically define the relation between the two scores, based on the basic idea:
+
+The algorithm for computing the scores is the power method, which converges to the left and right singular vectors corresponding to the largest singular value of L. 
+
+In the implementation of HITS, the adjacency matrix not of the whole Web but of all the pages relevant to the query is used.
+
+There is now an extensive literature on pagerank, HITS, and other ranking methods. 
+
+For overviews, see [9, 68, 70]. 
+
+A combination of HITS and pagerank has been proposed in [75].
+
+Obviously, the ideas underlying pagerank and HITS are not restricted to Web applications but can be applied to other network analyses. 
+
+A variant of the HITS method was used in a study of Supreme Court precedent [45].
+
+HITS is generalized in [19], which also treats synonym extraction. 
+
+In [81], generank is used for the analysis of microarray experiments. 
+
+Pagerank ideas have also been used in biomedical language processing [2].
+
+  
